@@ -2,6 +2,7 @@ package com.badlogic.pacman.controller;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.pacman.model.Direction;
 import com.badlogic.pacman.model.Pacman;
 import com.badlogic.pacman.model.Skeleton;
@@ -29,6 +30,42 @@ public class PacmanMovementControls implements Skeleton {
         this.height = config.get("height");
         this.speed = config.get("speed");
     }
+
+
+    Vector2 direction, position;
+
+    {
+        direction = new Vector2(1,-1); // След. движение пэкмена (1;-1  - вправо(x) и вниз(y))
+        position = new Vector2(1,1); // Позиция пэкмена (он стоит на 1,1)
+    }
+
+    // Вызывается каждый тик
+    void gameLoop()
+    {
+        calcDirection();
+        avoidCollision();
+
+        position.add(direction);
+    }
+
+    void calcDirection()
+    {
+        direction.set(0,0);
+        if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT))  direction.x = -1;
+        if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT))  direction.x = 1;
+        if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN))  direction.y = -1;
+        if (Gdx.input.isKeyJustPressed(Input.Keys.UP))  direction.y = 1;
+    }
+
+    int[][] map = new int[100][100];
+
+    void avoidCollision()
+    {
+        if (map[(int) (direction.x+position.x)][(int) position.x] == 2) direction.x = 0;
+        if (map[(int) (direction.y+position.y)][(int) position.y] == 2) direction.y = 0;
+    }
+
+
 
     public void processPacmanControls(Pacman pacman, int[][] skeleton) {
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT) && Gdx.input.isKeyPressed(Input.Keys.DOWN)
