@@ -2,13 +2,10 @@ package com.badlogic.pacman.controller;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.pacman.MyPacmanGame;
 import com.badlogic.pacman.model.Direction;
 import com.badlogic.pacman.model.Pacman;
 import com.badlogic.pacman.model.Skeleton;
-
 import java.util.Map;
-
 import static com.badlogic.pacman.model.Direction.LEFT;
 import static com.badlogic.pacman.model.Direction.DOWN;
 import static com.badlogic.pacman.model.Direction.UP;
@@ -21,9 +18,7 @@ public class PacmanMovementControls implements Skeleton {
     private final int stepY;
     private int height;
     private int width;
-    private boolean positionUpdate;
     private int speed;
-    private int nextBlock;
     private boolean justTurned;
 
     public PacmanMovementControls(Map<String, Integer> config) {
@@ -60,6 +55,18 @@ public class PacmanMovementControls implements Skeleton {
         } else if (Gdx.input.isKeyPressed(Input.Keys.UP) && Gdx.input.isKeyPressed(Input.Keys.RIGHT)
                 && pacman.getDirection() == UP) {
             pacmanDoubleMovement(UP, RIGHT, pacman, skeleton);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && Gdx.input.isKeyPressed(Input.Keys.LEFT)
+                && pacman.getDirection() == RIGHT) {
+            pacmanInverseMovement(RIGHT, LEFT, pacman, skeleton);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT) && Gdx.input.isKeyPressed(Input.Keys.RIGHT)
+                && pacman.getDirection() == LEFT) {
+            pacmanInverseMovement(LEFT, RIGHT, pacman, skeleton);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.UP) && Gdx.input.isKeyPressed(Input.Keys.DOWN)
+                && pacman.getDirection() == UP) {
+            pacmanInverseMovement(UP, DOWN, pacman, skeleton);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN) && Gdx.input.isKeyPressed(Input.Keys.UP)
+                && pacman.getDirection() == DOWN) {
+            pacmanInverseMovement(DOWN, UP, pacman, skeleton);
         } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             pacmanMovement(LEFT, pacman, skeleton);
         } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
@@ -69,18 +76,14 @@ public class PacmanMovementControls implements Skeleton {
         } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
             pacmanMovement(DOWN, pacman, skeleton);
         } else {
+            int nextBlock = getNextElement(pacman.getDirection(), skeleton, pacman);
             roundPosition(pacman.getDirection(), nextBlock == BLOCK, pacman);
         }
-
-//        if (currentGameElement instanceof BasicPellet) {
-//            eatPellet(currentGameElement);
-//        }
-        positionUpdate = false;
     }
 
 
     public void pacmanMovement(Direction direction, Pacman pacman, int[][] skeleton) {
-        nextBlock = getNextElement(direction, skeleton, pacman);
+        int nextBlock = getNextElement(direction, skeleton, pacman);
         if (nextBlock != BLOCK) {
             pacman.setDirection(direction);
             updatePosition(pacman);
@@ -92,7 +95,7 @@ public class PacmanMovementControls implements Skeleton {
 
     public void pacmanDoubleMovement(Direction direction, Direction addDirection,
                                      Pacman pacman, int[][] skeleton) {
-        nextBlock = getNextElement(direction, skeleton, pacman);
+        int nextBlock = getNextElement(direction, skeleton, pacman);
         int checkAddBlock = 0;
         if (!justTurned) {
             checkAddBlock = checkAdditionalElement(pacman, addDirection, pacman.getDirection(), skeleton);
@@ -103,6 +106,16 @@ public class PacmanMovementControls implements Skeleton {
         } else if (nextBlock != BLOCK) {
             pacman.setDirection(direction);
             updatePosition(pacman);
+        }
+    }
+
+    public void pacmanInverseMovement(Direction direction, Direction addDirection, Pacman pacman, int[][] skeleton) {
+        int nextBlock = getNextElement(direction, skeleton, pacman);
+        if (nextBlock != BLOCK) {
+            pacman.setDirection(direction);
+            updatePosition(pacman);
+        } else {
+            pacman.setDirection(addDirection);
         }
     }
 

@@ -31,6 +31,10 @@ public class GameScreen implements Screen {
     private PacmanMovementControls controls;
     private PacmanRenderer pacmanRenderer = new PacmanRenderer();
     private String field;
+    private int width;
+    private int height;
+    private int countWidth;
+    private int countHeight;
 
     private Map<String, Integer> config;
 
@@ -45,12 +49,16 @@ public class GameScreen implements Screen {
         this.pacmanId = pacman.getPacmanId();
         this.pacmanAnimation = new PacmanAnimation();
         this.config = config;
-        map = new GameMap();
-        block = new Texture(Gdx.files.internal("block.png"));
-        emptyBlock = new Texture(Gdx.files.internal("dark.png"));
-        pellet = new Texture(Gdx.files.internal("pellet.png"));
+        this.map = new GameMap();
+        this.block = new Texture(Gdx.files.internal("block.png"));
+        this.emptyBlock = new Texture(Gdx.files.internal("dark.png"));
+        this.pellet = new Texture(Gdx.files.internal("pellet.png"));
         this.controls = new PacmanMovementControls(config);
         this.pacmanList = Array.with(pacman);
+        this.height = config.get("height");
+        this.width = config.get("width");
+        this.countHeight = config.get("countHeight");
+        this.countWidth = config.get("countWidth");
     }
 
     @Override
@@ -61,20 +69,22 @@ public class GameScreen implements Screen {
 
         game.batch.begin();
 
+        int blockWidthSize = width / countWidth;
+        int blockHeightSize = height / countHeight;
         int c = 0;
         int b = 0;
         for (int y = 0; y < skeleton.length; y++) {
             for (int x = 0; x < skeleton[y].length; x++) {
-                if (skeleton[y][x] == 0)
-                    game.batch.draw(block, c, b, 506 / 23, 484 / 22);
-                else if (skeleton[y][x] == 2) {
-                    game.batch.draw(pellet, c, b, 506 / 23, 484 / 22);
+                if (skeleton[y][x] == Skeleton.BLOCK)
+                    game.batch.draw(block, c, b, blockWidthSize, blockHeightSize);
+                else if (skeleton[y][x] == Skeleton.PELLET) {
+                    game.batch.draw(pellet, c, b, blockWidthSize, blockHeightSize);
                 } else
-                    game.batch.draw(emptyBlock, c, b, 506 / 23, 484 / 22);
-                c += 22;
-                if (x >= skeleton[y].length-1) {
+                    game.batch.draw(emptyBlock, c, b, blockWidthSize, blockHeightSize);
+                c += blockWidthSize;
+                if (x >= skeleton[y].length - 1) {
                     c = 0;
-                    b += 22;
+                    b += blockHeightSize;
                 }
             }
         }
